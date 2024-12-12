@@ -11,9 +11,11 @@ import {
   Stack,
   LoadingOverlay,
   rem,
+  SimpleGrid,
 } from '@mantine/core';
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { IconUpload, IconPhoto, IconX } from '@tabler/icons-react';
+import CompareImages from 'react-compare-image';
 import { initWasm, upscaleImage } from './wasm-handler';
 
 function App() {
@@ -22,6 +24,8 @@ function App() {
   const [scaleFactor, setScaleFactor] = useState('2');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isWasmReady, setIsWasmReady] = useState(false);
+
+  const appVersion = process.env.PACKAGE_VERSION;
 
   useEffect(() => {
     initWasm().then(() => setIsWasmReady(true));
@@ -97,7 +101,7 @@ function App() {
             </Group>
           </Dropzone>
 
-          <Group justify="center" mt="xl">
+          <Group justify="space-between" align='flex-end' mt="xl">
             <Select
               label="Scale Factor"
               value={scaleFactor}
@@ -119,29 +123,25 @@ function App() {
           </Group>
         </Paper>
 
-        {originalImage && (
+        {originalImage && upscaledImage && (
           <Paper radius="md" p="xl" withBorder>
-            <Title order={3} mb="md">Original Image</Title>
-            <Image src={originalImage} fit="contain" />
+            <Title order={3} mb="md">Compare Images</Title>
+            <CompareImages
+              leftImage={originalImage}
+              rightImage={upscaledImage}
+              leftImageLabel='Original'
+              rightImageLabel='Upscaled'
+              sliderLineWidth={3}
+              sliderLineColor="var(--mantine-color-blue-6)"
+            />
           </Paper>
         )}
 
-        {upscaledImage && (
-          <Paper radius="md" p="xl" withBorder>
-            <Group justify="space-between" mb="md">
-              <Title order={3}>Upscaled Image ({scaleFactor}x)</Title>
-              <Button
-                component="a"
-                href={upscaledImage}
-                download={`upscaled-${scaleFactor}x.png`}
-                variant="light"
-              >
-                Download
-              </Button>
-            </Group>
-            <Image src={upscaledImage} fit="contain" />
-          </Paper>
-        )}
+        <div height={60} p="md">
+          <Text align="center" size="sm" color="dimmed">
+            Image Upscaler v{appVersion}
+          </Text>
+        </div>
       </Stack>
     </Container>
   );
