@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import wasm from 'vite-plugin-wasm';
 import { VitePWA } from 'vite-plugin-pwa';
 import { version } from './package.json';
+import fs from 'fs';
 
 export default defineConfig({
   plugins: [
@@ -39,5 +40,9 @@ export default defineConfig({
     fs: {
       allow: ['..'],
     },
+    https: {
+      key: fs.readFileSync('./localhost-key.pem'),
+      cert: fs.readFileSync('./localhost.pem'),
+    }
   },
 });

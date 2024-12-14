@@ -24,8 +24,33 @@ function App() {
   const [scaleFactor, setScaleFactor] = useState('2');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isWasmReady, setIsWasmReady] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
 
   const appVersion = process.env.PACKAGE_VERSION;
+
+  useEffect(() => {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      console.log('beforeinstallprompt event fired');
+
+      e.preventDefault();
+      setDeferredPrompt(e);
+    });
+  }, []);
+
+  const handleInstallClick = () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        setDeferredPrompt(null);
+      });
+    }
+  };
+  
 
   useEffect(() => {
     initWasm().then(() => setIsWasmReady(true));
@@ -58,6 +83,8 @@ function App() {
   };
 
   return (
+    <div>
+       
     <Container size="lg" py="xl">
       <Stack spacing="xl">
         <Title order={1} align="center" mb="xl">
@@ -144,6 +171,12 @@ function App() {
         </div>
       </Stack>
     </Container>
+    {deferredPrompt && (
+        <Button onClick={handleInstallClick}>
+          Install App
+        </Button>
+      )}
+    </div>
   );
 }
 
